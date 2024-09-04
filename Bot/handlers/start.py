@@ -3,22 +3,27 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Bot import app
 import asyncio
 
-# Function to send an animated butterfly
-async def send_butterfly_animation(chat_id):
-    butterfly_animation = [
-        "🦋", "🌸", "🦋", "🌸", "🦋", "🌸", "🦋", "🌸", "🦋", "🌸"
-    ]
-    for frame in butterfly_animation:
-        await app.send_message(chat_id, frame)
+# Function to alternate between skull and thunder emojis
+async def send_skull_thunder_animation(chat_id):
+    skull_emoji = "💀"
+    thunder_emoji = "⚡"
+    
+    message = await app.send_message(chat_id, skull_emoji)  # Send the initial skull emoji
+    
+    for _ in range(3):  # Repeat the cycle 3 times
         await asyncio.sleep(0.5)
+        await message.edit_text(thunder_emoji)  # Edit to thunder emoji
+        
+        await asyncio.sleep(0.5)
+        await message.edit_text(skull_emoji)  # Edit back to skull emoji
 
 # Command handler for /start
 @app.on_message(filters.command("start"))
 async def start_handler(client, message: Message):
     chat_id = message.chat.id
 
-    # Send butterfly animation
-    await send_butterfly_animation(chat_id)
+    # Send skull and thunder animation
+    await send_skull_thunder_animation(chat_id)
 
     # Send the image as an interface
     await app.send_photo(chat_id, "https://telegra.ph/file/d83a2cf2bd0dd868f37ae.jpg")
@@ -26,7 +31,7 @@ async def start_handler(client, message: Message):
     # Create the inline keyboard with two buttons
     keyboard = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("MY MASTER", url="http://t.me//sung_jinwo4")],
+            [InlineKeyboardButton("MY MASTER", url="http://t.me//sungjinwo4")],
             [InlineKeyboardButton("CHANNEL", url="http://t.me//beyondlimit7")]
         ]
     )
