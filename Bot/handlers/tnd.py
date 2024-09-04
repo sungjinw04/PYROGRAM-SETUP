@@ -27,23 +27,21 @@ DARE_TASKS = [
 
 @app.on_message(filters.command("tnd"))
 async def truth_or_dare(client, message):
-    emojis = ["💀", "☠️"]
+    emoji = "💀"
     
     # Send the initial animated emoji cycle
-    emoji_msg = await message.reply(emojis[0])
-    for i in range(1):  # Cycle 3 times
-        for emoji in emojis:
-            # Change the message content slightly to avoid MESSAGE_NOT_MODIFIED error
-            await asyncio.sleep(1.25)  # Increased delay to 1.5 seconds
-            await emoji_msg.edit_text(f"{emoji} {i+1}")
+    emoji_msg = await message.reply(emoji)
+    for i in range(3):  # Cycle 3 times
+        await asyncio.sleep(1.5)  # Delay between edits
+        await emoji_msg.edit_text(f"{emoji} {i+1}")
 
     # Edit the message to ask the user to choose Truth or Dare
-    await emoji_msg.edit_text("choose.....☠️🥷")
+    await emoji_msg.edit_text("choose.....💀🥷")
     
     # Create the inline keyboard with Truth and Dare buttons
     keyboard = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Truth ☠️", callback_data="truth")],
+            [InlineKeyboardButton("Truth 💀", callback_data="truth")],
             [InlineKeyboardButton("Dare 💀", callback_data="dare")]
         ]
     )
@@ -56,7 +54,7 @@ async def handle_choice(client, callback_query):
     choice = callback_query.data
     if choice == "truth":
         question = random.choice(TRUTH_QUESTIONS)
-        await callback_query.message.reply(f"Truth ☠️: {question}")
+        await callback_query.message.reply(f"Truth 💀: {question}")
     elif choice == "dare":
         dare = random.choice(DARE_TASKS)
         await callback_query.message.reply(f"Dare 💀: {dare}")
