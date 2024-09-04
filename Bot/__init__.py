@@ -5,15 +5,12 @@ from pyrogram.types import Message
 from .config import api_id, api_hash, bot_token, OWNER_ID as BOT_OWNER
 import sys
 
-
-
 loop = asyncio.get_event_loop()
 
 # Pyrogram Client instance
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-# In-memory set to store group chat IDs (use a database in production)
-app.group_chat_ids = set()
+
 
 StartTime = time.time()
 BOT_ID: int = 0
@@ -39,14 +36,6 @@ async def get_readable_time(seconds: int) -> str:
 
     return time_string
   
-# Track group chat IDs when the bot is added or removed
-@app.on_chat_member_updated()
-async def track_group_chats(client: Client, message: Message):
-    if message.chat.type in ("group", "supergroup"):
-        if message.new_chat_member and message.new_chat_member.is_self:
-            app.group_chat_ids.add(message.chat.id)
-        elif message.left_chat_member and message.left_chat_member.is_self:
-            app.group_chat_ids.discard(message.chat.id)
 
 async def init_bot():
     global BOT_NAME, BOT_USERNAME, BOT_ID, MENTION_BOT, JOINED_USERS
@@ -71,5 +60,5 @@ async def init_bot():
 async def main():
     await init_bot()
 
-loop.run_until_complete(main())
 
+loop.run_until_complete(main())
