@@ -31,8 +31,7 @@ async def truth_or_dare(client, message):
     
     # Send the animated emoji once and wait
     emoji_msg = await message.reply(emoji)
-    await asyncio.sleep(1.5 * 3)  # Wait for 4.5 seconds (1.5 seconds x 3 cycles)
-
+    
     # Edit the message to ask the user to choose Truth or Dare
     await emoji_msg.edit_text("choose.....💀🥷")
     
