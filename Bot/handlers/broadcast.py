@@ -17,11 +17,8 @@ async def broadcast_message(client: Client, message: Message):
     else:
         broadcast_text = message.text.split(maxsplit=1)[1]
 
-    # Get all group chats the bot is in
-    dialogs = await app.get_dialogs()
-
-    # Iterate over the dialogs and send the message to group chats
-    for dialog in dialogs:
+    # Use async for to iterate over all group chats the bot is in
+    async for dialog in app.get_dialogs():
         if dialog.chat.type in ("group", "supergroup"):
             try:
                 await app.send_message(chat_id=dialog.chat.id, text=broadcast_text)
@@ -37,4 +34,4 @@ async def broadcast_message(client: Client, message: Message):
 @app.on_message(filters.command("bcast") & ~filters.user(BOT_OWNER))
 async def unauthorized_bcast(client: Client, message: Message):
     await message.reply_text("You are not authorized to use this command.")
-
+    
