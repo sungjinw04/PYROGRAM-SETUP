@@ -2,6 +2,7 @@ import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import asyncio
+
 # Import the app instance from the bot's __init__.py
 from .. import app
 
@@ -53,10 +54,10 @@ async def challenge_user(client, message):
     buttons = InlineKeyboardMarkup(
         [
             [InlineKeyboardButton("ACCEPT", callback_data=f"accept:{challenger_id}:{challenged_user_id}")],
-            [InlineKeyboardButton("DECLINE", callback_data=f"decline:{challenger_id}")]
+            [InlineKeyboardButton("DECLINE", callback_data=f"decline:{challenger_id}:{challenged_user_id}")]
         ]
     )
-    await message.reply_to_message.reply("You have been challenged for a game..!", reply_markup=buttons)
+    await message.reply_to_message.reply("You have been challenged for a game of Tic Tac Toe!", reply_markup=buttons)
 
     # Notify the challenger that their challenge has been sent
     await message.reply("Challenge sent!")
@@ -68,52 +69,42 @@ async def handle_challenge_response(client, callback_query):
     action = data[0]
     challenger_id = int(data[1])
     
-    if action == "accept":
-        # "accept:{challenger_id}:{challenged_user_id}"
-        if len(data) < 3:
-            await callback_query.answer("Invalid callback data.", show_alert=True)
-            return
-        
-        challenged_user_id = int(data[2])
-        
-        if callback_query.from_user.id != challenged_user_id:
-            await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
-            return
+    # Check if the callback data is valid
+    if len(data) < 3:
+        await callback_query.answer("Invalid callback data.", show_alert=True)
+        return
+    
+    challenged_user_id = int(data[2])
+    
+    # Ensure only the challenged user can respond to both accept and decline
+    if callback_query.from_user.id != challenged_user_id:
+        await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
+        return
 
+    if action == "accept":
         # Start the game
-        await callback_query.message.reply("⚡", quote=True)
+        await callback_query.message.reply("⚡ Game starting!", quote=True)
         await asyncio.sleep(1)
         
         board = create_board()
-        games[(challenger_id, challenged_user_id)] = {'board': board, 'turn': challenger_id, 'challenger_id': challenger_id, 'challenged_user_id': challenged_user_id}
+        games[(challenger_id, challenged_user_id)] = {
+            'board': board, 'turn': challenger_id, 
+            'challenger_id': challenger_id, 'challenged_user_id': challenged_user_id
+        }
         
-        await callback_query.message.reply("Game started! It's your move.", reply_markup=board_to_keyboard(board, challenger_id, challenged_user_id))
+        await callback_query.message.reply(
+            "Game started! It's your move.",
+            reply_markup=board_to_keyboard(board, challenger_id, challenged_user_id)
+        )
         
     elif action == "decline":
-        # "decline:{challenger_id}"
-        # Ensure there are enough elements in the data list
-        if len(data) < 2:
-            await callback_query.answer("Invalid callback data.", show_alert=True)
-            return
-        
-        # The challenged user is the one responding to the decline button
-        challenged_user_id = callback_query.from_user.id
-        
-        # Ensure only the challenged user can decline
-        if callback_query.from_user.id != challenged_user_id:
-            await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
-            return
-        
         # Notify the challenger that the challenge was declined
         try:
-            await client.send_message(challenger_id, "Your request has been declined.")
+            await client.send_message(challenger_id, "Your challenge request has been declined.")
         except Exception as e:
             await callback_query.answer(f"Error: {e}", show_alert=True)
 
     await callback_query.message.delete()
-    
-
-    
 
 # Handle moves
 @app.on_callback_query(filters.regex(r"move"))
