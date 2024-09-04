@@ -1,6 +1,7 @@
 from pyrogram import filters
 from pyrogram.types import Message, InputMediaPhoto
 from Bot import app
+import asyncio
 
 # Function to send an animated butterfly
 async def send_butterfly_animation(chat_id):
