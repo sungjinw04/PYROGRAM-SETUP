@@ -4,7 +4,7 @@ from pyrogram.enums import ChatMembersFilter
 from pyrogram.errors import FloodWait
 
 from Bot import app  # Ensure this matches your import path for the `app` object
-from ..config import adminlist  # Use relative import
+from ..config import OWNER_ID  # Correct imports from config.py
 from Bot.utils.database import (
     get_active_chats,
     get_authuser_names,
@@ -16,6 +16,13 @@ from Bot.utils.decorators.language import language  # Update with your decorator
 from Bot.utils.formatters import alpha_to_int  # Update with your formatters path
 
 IS_BROADCASTING = False
+
+# Initialize adminlist directly
+adminlist = {}
+
+# The rest of your code remains the same...
+
+
 
 # The rest of your code remains the same...
 
