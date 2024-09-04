@@ -3,6 +3,7 @@ from pyrogram import filters
 from pyrogram.enums import ChatMembersFilter
 from pyrogram.errors import FloodWait
 from Bot.utils.database import get_active_chats
+from Bot.utils.database import get_authuser_names
 
 from Bot import app  # Ensure this matches your import path for the `app` object
 from ..config import OWNER_ID  # Correct imports from config.py
