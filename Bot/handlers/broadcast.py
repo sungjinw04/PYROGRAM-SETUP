@@ -18,7 +18,10 @@ async def broadcast_message(client: Client, message: Message):
         broadcast_text = message.text.split(maxsplit=1)[1]
 
     # Get all group chats the bot is in
-    async for dialog in app.iter_dialogs():
+    dialogs = await app.get_dialogs()
+
+    # Iterate over the dialogs and send the message to group chats
+    for dialog in dialogs:
         if dialog.chat.type in ("group", "supergroup"):
             try:
                 await app.send_message(chat_id=dialog.chat.id, text=broadcast_text)
