@@ -1,15 +1,22 @@
-import time
-from datetime import datetime, timedelta
-from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from Bot import app
-
-# Assuming you have a MongoDB connection setup to store message counts
 from pymongo import MongoClient
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from Bot import app  # Make sure you import 'app' from your main bot script
+from .config import MONGO_URL
 
-client = MongoClient('mongodb+srv://misamusic:misamusic@cluster0.s9trzk4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+# Set up MongoDB connection
+client = MongoClient(MONGO_URL)
 db = client['telegram_bot']
 messages_collection = db['message_counts']
+
+
+@app.on_message(filters.group)
+async def count_messages(client, message: Message):
+    messages_collection.insert_one({
+        "chat_id": message.chat.id,
+        "user_id": message.from_user.id,
+        "timestamp": message.date
+    })
 
 # /rank command
 @app.on_message(filters.command("rank") & filters.group)
