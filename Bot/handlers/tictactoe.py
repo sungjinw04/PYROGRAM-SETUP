@@ -1,6 +1,7 @@
 import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import asyncio
 
 # Import the app instance from the bot's __init__.py
 from .. import app
