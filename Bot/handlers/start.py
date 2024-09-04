@@ -1,5 +1,5 @@
 from pyrogram import filters
-from pyrogram.types import Message, InputMediaPhoto
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Bot import app
 import asyncio
 
@@ -23,8 +23,16 @@ async def start_handler(client, message: Message):
     # Send the image as an interface
     await app.send_photo(chat_id, "https://telegra.ph/file/d83a2cf2bd0dd868f37ae.jpg")
 
-    # Send a welcome message
-    await app.send_message(chat_id, "wlcm to Sung Network")
+    # Create the inline keyboard with two buttons
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("MY MASTER", url="http://t.me//sungjinwo4")],
+            [InlineKeyboardButton("CHANNEL", url="http://t.me//beyondlimit7")]
+        ]
+    )
+
+    # Send a welcome message with the buttons
+    await app.send_message(chat_id, "wlcm to Sung Network", reply_markup=keyboard)
 
 # Ensure that this file's functions are imported when the bot starts
 if __name__ == "__main__":
