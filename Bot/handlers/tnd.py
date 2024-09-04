@@ -34,7 +34,7 @@ async def truth_or_dare(client, message):
     for i in range(3):  # Cycle 3 times
         for emoji in emojis:
             # Change the message content slightly to avoid MESSAGE_NOT_MODIFIED error
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(1.5)  # Increased delay to 1.5 seconds
             await emoji_msg.edit_text(f"{emoji} {i+1}")
 
     # Edit the message to ask the user to choose Truth or Dare
