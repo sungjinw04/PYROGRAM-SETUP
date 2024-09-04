@@ -19,15 +19,18 @@ def get_top_users(chat_id, time_frame=None):
     return users
 
 def generate_rank_text(chat_id, time_frame=None):
+def generate_rank_text(chat_id, time_frame=None):
     top_users = get_top_users(chat_id, time_frame)
     if not top_users:
         return "No data available."
 
     rank_text = "Top 10 Chatters:\n\n"
     for i, user in enumerate(top_users):
-        rank_text += f"{i + 1}. User ID: {user['user_id']} - Messages: {user['message_count']}\n"
+        message_count = user.get('message_count', 0)  # Safely get message_count
+        rank_text += f"{i + 1}. User ID: {user['user_id']} - Messages: {message_count}\n"
 
     return rank_text
+
 
 @app.on_message(filters.command("rank") & filters.group)
 async def rank_command(client, message: Message):
