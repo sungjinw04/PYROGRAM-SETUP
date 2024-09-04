@@ -1,100 +1,61 @@
-from Bot.config import MONGO_URL
-from Bot import app
-from datetime import datetime, timedelta
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from Bot.config import MONGO_URL  # Corrected import
-from Bot import app  # Corrected import
-
+from Bot.config import MONGO_URL
+from Bot import app
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 
 # Set up MongoDB connection
 client = MongoClient(MONGO_URL)
 db = client['telegram_bot']
 messages_collection = db['message_counts']
 
-# Rest of the ranking.py code...
+def get_top_users(chat_id, time_frame=None):
+    query = {"chat_id": chat_id}
+    if time_frame:
+        query["last_message"] = {"$gte": time_frame}
 
+    users = list(messages_collection.find(query).sort("message_count", -1).limit(10))
+    return users
 
+def generate_rank_text(chat_id, time_frame=None):
+    top_users = get_top_users(chat_id, time_frame)
+    if not top_users:
+        return "No data available."
 
+    rank_text = "Top 10 Chatters:\n\n"
+    for i, user in enumerate(top_users):
+        rank_text += f"{i + 1}. User ID: {user['user_id']} - Messages: {user['message_count']}\n"
 
-@app.on_message(filters.group)
-async def count_messages(client, message: Message):
-    messages_collection.insert_one({
-        "chat_id": message.chat.id,
-        "user_id": message.from_user.id,
-        "timestamp": message.date
-    })
+    return rank_text
 
-# /rank command
 @app.on_message(filters.command("rank") & filters.group)
 async def rank_command(client, message: Message):
-    chat_id = message.chat.id
-    overall_ranking = get_overall_ranking(chat_id)
-    
-    buttons = [
-        [InlineKeyboardButton("Overall Ranking", callback_data=f"overall_{chat_id}")],
-        [InlineKeyboardButton("Weekly Ranking", callback_data=f"weekly_{chat_id}")],
-        [InlineKeyboardButton("Daily Ranking", callback_data=f"daily_{chat_id}")]
-    ]
-    reply_markup = InlineKeyboardMarkup(buttons)
-    
-    await message.reply_text(
-        f"Overall message count in this group: {overall_ranking['total']}\n\nTop 10 Chatters:\n{format_ranking(overall_ranking['top_10'])}",
-        reply_markup=reply_markup
-    )
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Overall Ranking", callback_data="overall_ranking")],
+        [InlineKeyboardButton("Weekly Ranking", callback_data="weekly_ranking")],
+        [InlineKeyboardButton("Daily Ranking", callback_data="daily_ranking")]
+    ])
 
-# Function to get overall ranking
-def get_overall_ranking(chat_id):
-    pipeline = [
-        {"$match": {"chat_id": chat_id}},
-        {"$group": {"_id": "$user_id", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": 10}
-    ]
-    top_10 = list(messages_collection.aggregate(pipeline))
-    total_messages = sum([user['count'] for user in top_10])
-    return {"total": total_messages, "top_10": top_10}
+    await message.reply_text("Select ranking type:", reply_markup=keyboard)
 
-# Function to format the ranking data
-def format_ranking(top_10):
-    ranking_text = ""
-    for i, user in enumerate(top_10, start=1):
-        ranking_text += f"{i}. User {user['_id']}: {user['count']} messages\n"
-    return ranking_text
+@app.on_callback_query(filters.regex(r"overall_ranking"))
+async def overall_ranking(client, callback_query):
+    chat_id = callback_query.message.chat.id
+    rank_text = generate_rank_text(chat_id)
+    await callback_query.message.edit_text(rank_text)
 
-# Callback for buttons
-@app.on_callback_query(filters.regex(r"^(overall|weekly|daily)_(\d+)$"))
-async def rank_callback(client, callback_query):
-    chat_id = int(callback_query.data.split("_")[1])
-    rank_type = callback_query.data.split("_")[0]
+@app.on_callback_query(filters.regex(r"weekly_ranking"))
+async def weekly_ranking(client, callback_query):
+    chat_id = callback_query.message.chat.id
+    one_week_ago = datetime.utcnow() - timedelta(weeks=1)
+    rank_text = generate_rank_text(chat_id, one_week_ago)
+    await callback_query.message.edit_text(rank_text)
 
-    if rank_type == "overall":
-        ranking = get_overall_ranking(chat_id)
-    elif rank_type == "weekly":
-        ranking = get_period_ranking(chat_id, period="week")
-    else:
-        ranking = get_period_ranking(chat_id, period="day")
-
-    await callback_query.message.edit_text(
-        f"{rank_type.capitalize()} message count in this group: {ranking['total']}\n\nTop 10 Chatters:\n{format_ranking(ranking['top_10'])}"
-    )
-
-# Function to get ranking for a specific period (week or day)
-def get_period_ranking(chat_id, period):
-    now = datetime.now()
-    if period == "week":
-        start_time = now - timedelta(days=now.weekday())  # Start of the week
-    elif period == "day":
-        start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)  # Start of the day
-    
-    pipeline = [
-        {"$match": {"chat_id": chat_id, "timestamp": {"$gte": start_time}}},
-        {"$group": {"_id": "$user_id", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": 10}
-    ]
-    top_10 = list(messages_collection.aggregate(pipeline))
-    total_messages = sum([user['count'] for user in top_10])
-    return {"total": total_messages, "top_10": top_10}
+@app.on_callback_query(filters.regex(r"daily_ranking"))
+async def daily_ranking(client, callback_query):
+    chat_id = callback_query.message.chat.id
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    rank_text = generate_rank_text(chat_id, today_start)
+    await callback_query.message.edit_text(rank_text)
 
