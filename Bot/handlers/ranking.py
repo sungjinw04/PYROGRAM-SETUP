@@ -1,13 +1,21 @@
+from Bot.config import MONGO_URL
+from Bot import app
+from datetime import datetime, timedelta
+from pyrogram import filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from Bot.config import MONGO_URL  # Corrected import
+from Bot import app  # Corrected import
+
 from pymongo import MongoClient
-from pyrogram import Client, filters
-from pyrogram.types import Message
-from Bot import app  # Make sure you import 'app' from your main bot script
-from .config import MONGO_URL
 
 # Set up MongoDB connection
 client = MongoClient(MONGO_URL)
 db = client['telegram_bot']
 messages_collection = db['message_counts']
+
+# Rest of the ranking.py code...
+
+
 
 
 @app.on_message(filters.group)
