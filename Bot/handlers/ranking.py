@@ -7,7 +7,7 @@ from Bot import app
 # Assuming you have a MongoDB connection setup to store message counts
 from pymongo import MongoClient
 
-client = MongoClient('your_mongo_db_connection_string')
+client = MongoClient('mongodb+srv://misamusic:misamusic@cluster0.s9trzk4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 db = client['telegram_bot']
 messages_collection = db['message_counts']
 
