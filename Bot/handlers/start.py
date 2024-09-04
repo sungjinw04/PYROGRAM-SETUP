@@ -26,7 +26,7 @@ async def start_handler(client, message: Message):
     # Create the inline keyboard with two buttons
     keyboard = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("MY MASTER", url="http://t.me//sungjinwo4")],
+            [InlineKeyboardButton("MY MASTER", url="http://t.me//sung_jinwo4")],
             [InlineKeyboardButton("CHANNEL", url="http://t.me//beyondlimit7")]
         ]
     )
