@@ -3,6 +3,7 @@ from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pymongo import MongoClient
 from Bot.config import MONGO_URL
+from Bot.handlers import MODULES_PATH
 
 # Initialize MongoDB client
 client = MongoClient(MONGO_URL)
