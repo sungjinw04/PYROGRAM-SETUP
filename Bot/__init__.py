@@ -4,6 +4,31 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from .config import api_id, api_hash, bot_token, OWNER_ID as BOT_OWNER
 import sys
+from pymongo import MongoClient
+from pyrogram import Client, filters
+from pyrogram.types import Message
+from Bot import app
+from .config import MONGO_URL
+
+# Set up MongoDB connection
+client = MongoClient(MONGO_URL)
+db = client['telegram_bot']
+messages_collection = db['message_counts']
+
+@app.on_message(filters.group)
+async def count_messages(client, message: Message):
+    if message.from_user and message.chat:
+        messages_collection.update_one(
+            {
+                "chat_id": message.chat.id,
+                "user_id": message.from_user.id,
+            },
+            {
+                "$inc": {"message_count": 1},
+                "$set": {"last_message": message.date}
+            },
+            upsert=True
+        )
 
 loop = asyncio.get_event_loop()
 
