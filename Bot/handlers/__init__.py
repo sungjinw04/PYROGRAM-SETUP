@@ -25,4 +25,10 @@ def get_all_modules(dirname: str) -> Tuple[List[str]]:
 
 
 
-ALL_MODULES , MODULES_PATH = get_all_modules(os.path.dirname(__file__))
+ALL_MODULES, MODULES_PATH = get_all_modules(os.path.dirname(__file__))
+
+# Add ranking module manually if it's not being picked up automatically
+if 'ranking' not in ALL_MODULES:
+    ALL_MODULES.append('ranking')
+    MODULES_PATH.append(os.path.join(os.path.dirname(__file__), 'ranking.py'))
+
