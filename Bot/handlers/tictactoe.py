@@ -62,6 +62,7 @@ async def challenge_user(client, message):
     await message.reply("Challenge sent!")
 
 # Handle the accept/decline of the challenge
+# Handle the accept/decline of the challenge
 @app.on_callback_query(filters.regex(r"accept|decline"))
 async def handle_challenge_response(client, callback_query):
     data = callback_query.data.split(":")
@@ -85,16 +86,21 @@ async def handle_challenge_response(client, callback_query):
         await callback_query.message.reply("Game started! It's your move.", reply_markup=board_to_keyboard(board, challenger_id, challenged_user_id))
         
     elif action == "decline":
-        # Notify the challenger that the challenge was declined
-        if len(data) > 2:
-            challenged_user_id = int(data[2])
-            if callback_query.from_user.id != challenged_user_id:
-                await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
-                return
+        challenged_user_id = int(data[2])
+
+        # Ensure only the challenged user can decline
+        if callback_query.from_user.id != challenged_user_id:
+            await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
+            return
         
-        await client.send_message(challenger_id, "Your request has been declined.")
-    
+        # Notify the challenger that the challenge was declined
+        try:
+            await client.send_message(challenger_id, "Your request has been declined.")
+        except Exception as e:
+            await callback_query.answer(f"Error: {e}", show_alert=True)
+
     await callback_query.message.delete()
+
     
 
 # Handle moves
