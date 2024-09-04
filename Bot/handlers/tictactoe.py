@@ -67,13 +67,14 @@ async def handle_challenge_response(client, callback_query):
     data = callback_query.data.split(":")
     action = data[0]
     challenger_id = int(data[1])
-    challenged_user_id = int(data[2])
-
-    if callback_query.from_user.id != challenged_user_id:
-        await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
-        return
-
+    
     if action == "accept":
+        challenged_user_id = int(data[2])
+        
+        if callback_query.from_user.id != challenged_user_id:
+            await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
+            return
+
         # Start the game
         await callback_query.message.reply("⚡", quote=True)
         await asyncio.sleep(1)
@@ -85,9 +86,16 @@ async def handle_challenge_response(client, callback_query):
         
     elif action == "decline":
         # Notify the challenger that the challenge was declined
+        if len(data) > 2:
+            challenged_user_id = int(data[2])
+            if callback_query.from_user.id != challenged_user_id:
+                await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
+                return
+        
         await client.send_message(challenger_id, "Your request has been declined.")
     
     await callback_query.message.delete()
+    
 
 # Handle moves
 @app.on_callback_query(filters.regex(r"move"))
