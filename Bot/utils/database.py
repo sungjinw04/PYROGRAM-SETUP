@@ -9,4 +9,9 @@ async def get_active_chats():
 async def get_authuser_names(chat_id):
     # Example implementation
     return ["user1", "user2"]
+# Open a Python shell
+python
+
+# Test importing directly
+from Bot.utils.database import get_client
 
