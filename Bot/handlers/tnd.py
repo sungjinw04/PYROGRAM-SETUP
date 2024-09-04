@@ -31,7 +31,7 @@ async def truth_or_dare(client, message):
     
     # Send the initial animated emoji cycle
     emoji_msg = await message.reply(emoji)
-    for i in range(3):  # Cycle 3 times
+    for i in range(1):  # Cycle 3 times
         await asyncio.sleep(1.5)  # Delay between edits
         await emoji_msg.edit_text(f"{emoji} {i+1}")
 
