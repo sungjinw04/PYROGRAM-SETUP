@@ -2,7 +2,6 @@ import random
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import asyncio
-
 # Import the app instance from the bot's __init__.py
 from .. import app
 
@@ -59,6 +58,9 @@ async def challenge_user(client, message):
     )
     await message.reply_to_message.reply("You have been challenged for a game..!", reply_markup=buttons)
 
+    # Notify the challenger that their challenge has been sent
+    await message.reply("Challenge sent!")
+
 # Handle the accept/decline of the challenge
 @app.on_callback_query(filters.regex(r"accept|decline"))
 async def handle_challenge_response(client, callback_query):
@@ -66,6 +68,10 @@ async def handle_challenge_response(client, callback_query):
     action = data[0]
     challenger_id = int(data[1])
     challenged_user_id = int(data[2])
+
+    if callback_query.from_user.id != challenged_user_id:
+        await callback_query.answer("You are not authorized to respond to this challenge!", show_alert=True)
+        return
 
     if action == "accept":
         # Start the game
@@ -123,5 +129,4 @@ async def handle_move(client, callback_query):
         await callback_query.message.edit_reply_markup(reply_markup=board_to_keyboard(board, player1_id, player2_id))
 
     await callback_query.answer()
-
 
