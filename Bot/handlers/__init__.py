@@ -1,6 +1,6 @@
 import os
 from typing import Tuple, List
-        
+from Bot.config import MONGO_URL  # Corrected import path
 
 def get_all_modules(dirname: str) -> Tuple[List[str]]:
     """
@@ -22,40 +22,8 @@ def get_all_modules(dirname: str) -> Tuple[List[str]]:
                 modules_path.append(os.path.join(root, file))
                 module_names.append(file[:-3])
 
-    return module_names , modules_path
-
-from pymongo import MongoClient
-from pyrogram import Client, filters
-from pyrogram.types import Message
-from Bot import app
-from .config import MONGO_URL
-
-# Set up MongoDB connection
-client = MongoClient(MONGO_URL)
-db = client['telegram_bot']
-messages_collection = db['message_counts']
-
-@app.on_message(filters.group)
-async def count_messages(client, message: Message):
-    if message.from_user and message.chat:
-        result = messages_collection.update_one(
-            {
-                "chat_id": message.chat.id,
-                "user_id": message.from_user.id,
-            },
-            {
-                "$inc": {"message_count": 1},
-                "$set": {"last_message": message.date}
-            },
-            upsert=True
-        )
-
+    return module_names, modules_path
 
 
 ALL_MODULES, MODULES_PATH = get_all_modules(os.path.dirname(__file__))
-
-# Add ranking module manually if it's not being picked up automatically
-if 'ranking' not in ALL_MODULES:
-    ALL_MODULES.append('ranking')
-    MODULES_PATH.append(os.path.join(os.path.dirname(__file__), 'ranking.py'))
 
